@@ -2,6 +2,8 @@
 
 A lightweight, portable C library for converting Modbus register data into various data types with comprehensive endianness support.
 
+you can also visit [Online Modbus Data Converter](https://mouliraj56.github.io/modbus-data-converter/) which implements the same library. (ported to js)
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
