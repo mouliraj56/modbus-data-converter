@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Hex Converter - Modbus Data Types</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-gradient-start: #0f2027;
+            --bg-gradient-mid: #203a43;
+            --bg-gradient-end: #2c5364;
+            --panel-bg: rgba(255, 255, 255, 0.95);
+            --panel-border: rgba(44, 83, 100, 0.2);
+            --text-primary: #1a202c;
+            --text-secondary: #2d3748;
+            --text-tertiary: #4a5568;
+            --accent-primary: #3182ce;
+            --accent-secondary: #2c5282;
+            --accent-hover: #2563eb;
+            --card-bg-start: #ffffff;
+            --card-bg-end: #f7fafc;
+            --card-border: #cbd5e0;
+            --input-bg: #f7fafc;
+            --input-border: #a0aec0;
+            --value-bg: #ffffff;
+            --value-border: #cbd5e0;
+            --value-text: #2d3748;
+            --scrollbar-track: #e2e8f0;
+            --info-bg-start: #fef5e7;
+            --info-bg-end: #fdebd0;
+            --info-border: #f39c12;
+            --info-title: #d68910;
+            --info-text: #7d6608;
+            --byte-display-bg-start: #ebf8ff;
+            --byte-display-bg-end: #bee3f8;
+            --section-bg: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+            --success-color: #48bb78;
+            --error-color: #f56565;
+        }
+
+        body.dark-mode {
+            --bg-gradient-start: #0a0e27;
+            --bg-gradient-mid: #1a1f3a;
+            --bg-gradient-end: #2d3561;
+            --panel-bg: rgba(26, 32, 44, 0.95);
+            --panel-border: rgba(74, 85, 104, 0.3);
+            --text-primary: #e2e8f0;
+            --text-secondary: #cbd5e0;
+            --text-tertiary: #a0aec0;
+            --accent-primary: #63b3ed;
+            --accent-secondary: #4299e1;
+            --accent-hover: #3182ce;
+            --card-bg-start: #1a202c;
+            --card-bg-end: #2d3748;
+            --card-border: #4a5568;
+            --input-bg: #2d3748;
+            --input-border: #4a5568;
+            --value-bg: #1a202c;
+            --value-border: #4a5568;
+            --value-text: #e2e8f0;
+            --scrollbar-track: #2d3748;
+            --info-bg-start: #3d3420;
+            --info-bg-end: #4a3f2a;
+            --info-border: #f39c12;
+            --info-title: #f8b739;
+            --info-text: #fdebd0;
+            --byte-display-bg-start: #1e3a5f;
+            --byte-display-bg-end: #2d4a6f;
+            --section-bg: linear-gradient(135deg, #2b6cb0 0%, #2c5282 100%);
+            --success-color: #48bb78;
+            --error-color: #fc8181;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            height: 100vh;
+            padding: 15px;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 0.95em;
+            opacity: 0.95;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover .theme-toggle-icon {
+            transform: rotate(20deg);
+        }
+
+        .theme-toggle-text {
+            color: white;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .export-button {
+            position: absolute;
+            top: 0;
+            right: 140px;
+            background: rgba(72, 187, 120, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .export-button:hover {
+            background: rgba(72, 187, 120, 1);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+
+        .export-button:active {
+            transform: scale(0.98);
+        }
+
+        .export-icon {
+            font-size: 1.2em;
+        }
+
+        .export-text {
+            color: white;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 15px;
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .input-panel {
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border: 1px solid var(--panel-border);
+            transition: all 0.3s ease;
+        }
+
+        .input-panel h2 {
+            font-size: 1.3em;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            border-bottom: 3px solid var(--accent-primary);
+            padding-bottom: 8px;
+            flex-shrink: 0;
+        }
+
+        .hex-input-section {
+            margin-bottom: 25px;
+        }
+
+        .hex-input-section label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        #hexInput {
+            width: 100%;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        #hexInput:focus {
+            outline: none;
+            border-color: var(--accent-hover);
+            box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.2);
+            background: var(--value-bg);
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: var(--text-tertiary);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .byte-display {
+            background: linear-gradient(135deg, var(--byte-display-bg-start) 0%, var(--byte-display-bg-end) 100%);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .byte-display label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .byte-boxes {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .byte-box {
+            background: var(--value-bg);
+            border: 2px solid var(--accent-primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--accent-primary);
+            min-width: 50px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(49, 130, 206, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .byte-box:hover {
+            border-color: var(--accent-hover);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .results-panel {
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+            border: 1px solid var(--panel-border);
+            transition: all 0.3s ease;
+        }
+
+        .results-panel h2 {
+            font-size: 1.3em;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            border-bottom: 3px solid var(--accent-primary);
+            padding-bottom: 8px;
+            flex-shrink: 0;
+        }
+
+        #resultsContainer {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        #resultsContainer::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        #resultsContainer::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 5px;
+        }
+
+        #resultsContainer::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            border-radius: 5px;
+        }
+
+        #resultsContainer::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%);
+        }
+
+        .data-type-section {
+            margin-bottom: 20px;
+        }
+
+        .data-type-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+            padding: 10px 15px;
+            background: var(--section-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+        }
+
+        .conversion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+        }
+
+        .conversion-card {
+            background: linear-gradient(135deg, var(--card-bg-start) 0%, var(--card-bg-end) 100%);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+
+        .conversion-card:hover {
+            border-color: var(--accent-hover);
+            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--card-border);
+        }
+
+        .card-title {
+            font-size: 0.95em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-endian {
+            font-size: 0.7em;
+            color: var(--accent-primary);
+            background: var(--input-bg);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .value-group {
+            margin-bottom: 10px;
+        }
+
+        .value-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .value-label {
+            font-size: 0.75em;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .value-content {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            color: var(--value-text);
+            font-weight: 600;
+            padding: 8px 12px;
+            background: var(--value-bg);
+            border-radius: 8px;
+            border: 2px solid var(--value-border);
+            word-break: break-all;
+            transition: all 0.2s;
+        }
+
+        .value-content:hover {
+            border-color: var(--accent-hover);
+            box-shadow: 0 2px 8px rgba(49, 130, 206, 0.2);
+        }
+
+        .bit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .bit-card {
+            background: linear-gradient(135deg, var(--card-bg-start) 0%, var(--card-bg-end) 100%);
+            border: 2px solid var(--card-border);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .bit-card:hover {
+            border-color: var(--accent-hover);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25);
+        }
+
+        .bit-label {
+            font-size: 0.8em;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .bit-value {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .bit-value.true {
+            color: var(--success-color);
+            text-shadow: 0 0 10px rgba(72, 187, 120, 0.4);
+        }
+
+        .bit-value.false {
+            color: var(--error-color);
+            text-shadow: 0 0 10px rgba(245, 101, 101, 0.4);
+        }
+
+        .info-section {
+            background: linear-gradient(135deg, var(--info-bg-start) 0%, var(--info-bg-end) 100%);
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--info-border);
+            flex-shrink: 0;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .info-section h3 {
+            color: var(--info-title);
+            margin-bottom: 5px;
+            font-size: 1em;
+            font-weight: 700;
+        }
+
+        .info-section p {
+            color: var(--info-text);
+            line-height: 1.4;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 1400px) {
+            .conversion-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 320px 1fr;
+            }
+
+            .conversion-grid {
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            }
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                height: auto;
+                overflow: auto;
+            }
+
+            .container {
+                overflow: visible;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                overflow: visible;
+            }
+
+            .input-panel,
+            .results-panel {
+                overflow-y: visible;
+            }
+
+            #resultsContainer {
+                overflow-y: visible;
+            }
+
+            .conversion-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            header {
+                padding-top: 50px;
+            }
+
+            .export-button {
+                top: 10px;
+                right: 120px;
+                padding: 6px 12px;
+            }
+
+            .export-text {
+                font-size: 0.8em;
+            }
+
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+            }
+
+            .theme-toggle-text {
+                font-size: 0.8em;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            header p {
+                font-size: 1em;
+            }
+
+            .input-panel,
+            .results-panel {
+                padding: 20px;
+            }
+
+            .conversion-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bit-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .section-title {
+                font-size: 1.1em;
+                padding: 10px 12px;
+            }
+
+            .card-title {
+                font-size: 0.95em;
+            }
+
+            .value-content {
+                font-size: 0.95em;
+                padding: 6px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            header {
+                padding-top: 45px;
+            }
+
+            .export-button {
+                top: 5px;
+                right: 60px;
+                padding: 5px 10px;
+            }
+
+            .export-icon {
+                font-size: 1em;
+            }
+
+            .export-text {
+                display: none;
+            }
+
+            .theme-toggle {
+                top: 5px;
+                right: 5px;
+                padding: 5px 10px;
+            }
+
+            .theme-toggle-icon {
+                font-size: 1em;
+            }
+
+            .theme-toggle-text {
+                display: none;
+            }
+
+            header h1 {
+                font-size: 1.6em;
+            }
+
+            header p {
+                font-size: 0.9em;
+            }
+
+            .input-panel,
+            .results-panel {
+                padding: 15px;
+                border-radius: 8px;
+            }
+
+            .info-section {
+                padding: 15px;
+            }
+
+            #hexInput {
+                padding: 12px;
+                font-size: 1em;
+                letter-spacing: 1px;
+            }
+
+            .byte-box {
+                padding: 8px 12px;
+                font-size: 0.9em;
+                min-width: 45px;
+            }
+
+            .section-title {
+                font-size: 1em;
+                padding: 8px 10px;
+            }
+
+            .conversion-card {
+                padding: 15px;
+            }
+
+            .card-title {
+                font-size: 0.9em;
+            }
+
+            .card-endian {
+                font-size: 0.7em;
+                padding: 2px 6px;
+            }
+
+            .value-label {
+                font-size: 0.75em;
+            }
+
+            .value-content {
+                font-size: 0.85em;
+                padding: 6px 8px;
+            }
+
+            .bit-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .bit-card {
+                padding: 10px;
+            }
+
+            .bit-label {
+                font-size: 0.8em;
+            }
+
+            .bit-value {
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 360px) {
+            header h1 {
+                font-size: 1.4em;
+            }
+
+            .byte-boxes {
+                gap: 6px;
+            }
+
+            .byte-box {
+                padding: 6px 10px;
+                font-size: 0.85em;
+                min-width: 40px;
+            }
+
+            .bit-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="export-button" id="exportButton">
+                <span class="export-icon">📥</span>
+                <span class="export-text">Export Excel</span>
+            </button>
+            <div class="theme-toggle" id="themeToggle">
+                <span class="theme-toggle-icon">🌙</span>
+                <span class="theme-toggle-text">Dark</span>
+            </div>
+            <h1>🔧 Online Hex Converter</h1>
+            <p>Convert hex values into bytes, integers, and floats with different bit significance and endianness. Essential tool for Modbus, SCADA, and IIoT protocol analysis.</p>
+        </header>
+
+        <div class="info-section">
+            <h3>💡 How to Use</h3>
+            <p>Enter your hex values (e.g., 40490FDB for a Float32 value of π ≈ 3.14159). The tool automatically converts to all common data types with different byte orders. Each card shows Binary, Decimal, and Hex representations.</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-panel">
+                <h2>📥 Input</h2>
+                
+                <div class="hex-input-section">
+                    <label for="hexInput">Hex Value</label>
+                    <input type="text" id="hexInput" placeholder="40490FDB" maxlength="16">
+                    <div class="help-text">
+                        Enter up to 16 hex characters (8 bytes / 64 bits). Spaces are optional.
+                    </div>
+                </div>
+
+                <div class="byte-display">
+                    <label>Byte Representation</label>
+                    <div class="byte-boxes" id="byteDisplay">
+                        <div class="byte-box">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <h2>📊 Conversions</h2>
+                <div id="resultsContainer">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBytes = [];
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('.theme-toggle-icon');
+        const themeText = themeToggle.querySelector('.theme-toggle-text');
+
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeIcon.textContent = '☀️';
+            themeText.textContent = 'Light';
+        }
+
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+
+            if (isDark) {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Initialize
+        document.getElementById('hexInput').addEventListener('input', handleHexInput);
+        handleHexInput({ target: { value: '40490FDB' } }); // Default example
+
+        function handleHexInput(e) {
+            let hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+            e.target.value = hex;
+
+            // Parse hex into bytes
+            currentBytes = [];
+            for (let i = 0; i < hex.length; i += 2) {
+                if (i + 1 < hex.length) {
+                    currentBytes.push(parseInt(hex.substr(i, 2), 16));
+                } else {
+                    currentBytes.push(parseInt(hex.substr(i, 1) + '0', 16));
+                }
+            }
+
+            updateByteDisplay();
+            updateConversions();
+        }
+
+        function updateByteDisplay() {
+            const container = document.getElementById('byteDisplay');
+            if (currentBytes.length === 0) {
+                container.innerHTML = '<div class="byte-box">--</div>';
+                return;
+            }
+
+            container.innerHTML = currentBytes.map(b => 
+                `<div class="byte-box">${b.toString(16).toUpperCase().padStart(2, '0')}</div>`
+            ).join('');
+        }
+
+        function createCard(title, endian, decimal, hex, binary) {
+            return `
+                <div class="conversion-card">
+                    <div class="card-header">
+                        <div class="card-title">${title}</div>
+                        <div class="card-endian">${endian}</div>
+                    </div>
+                    <div class="value-group">
+                        <div class="value-label">Decimal</div>
+                        <div class="value-content">${decimal}</div>
+                    </div>
+                    <div class="value-group">
+                        <div class="value-label">Hexadecimal</div>
+                        <div class="value-content">${hex}</div>
+                    </div>
+                    <div class="value-group">
+                        <div class="value-label">Binary</div>
+                        <div class="value-content">${binary}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toBinary(num, bits) {
+            if (typeof num === 'bigint') {
+                let binary = num.toString(2);
+                if (num < 0n) {
+                    binary = (BigInt(1) << BigInt(bits)) + num;
+                    binary = binary.toString(2);
+                }
+                return binary.padStart(bits, '0');
+            }
+            return (num >>> 0).toString(2).padStart(bits, '0');
+        }
+
+        function toHex(num, bytes) {
+            if (typeof num === 'bigint') {
+                let hex = num.toString(16).toUpperCase();
+                if (num < 0n) {
+                    hex = ((BigInt(1) << BigInt(bytes * 8)) + num).toString(16).toUpperCase();
+                }
+                return '0x' + hex.padStart(bytes * 2, '0');
+            }
+            return '0x' + (num >>> 0).toString(16).toUpperCase().padStart(bytes * 2, '0');
+        }
+
+        function updateConversions() {
+            const container = document.getElementById('resultsContainer');
+            if (currentBytes.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">Enter hex values to see conversions</p>';
+                return;
+            }
+
+            let html = '';
+
+            // Bit Boolean section
+            if (currentBytes.length >= 1) {
+                html += '<div class="data-type-section">';
+                html += '<div class="section-title">🔘 Bit Boolean Values (Register 0)</div>';
+                html += '<div class="bit-grid">';
+                
+                const reg0 = (currentBytes[0] << 8) | (currentBytes[1] || 0);
+                for (let bit = 0; bit < 16; bit++) {
+                    const val = (reg0 >> bit) & 1;
+                    const className = val ? 'true' : 'false';
+                    html += `
+                        <div class="bit-card">
+                            <div class="bit-label">Bit ${bit}</div>
+                            <div class="bit-value ${className}">${val ? 'TRUE' : 'FALSE'}</div>
+                        </div>
+                    `;
+                }
+                html += '</div></div>';
+            }
+
+            // 8-bit integers
+            if (currentBytes.length >= 1) {
+                html += '<div class="data-type-section">';
+                html += '<div class="section-title">📊 8-bit Integer Values</div>';
+                html += '<div class="conversion-grid">';
+                
+                const u8 = currentBytes[0];
+                const i8 = u8 > 127 ? u8 - 256 : u8;
+                
+                html += createCard('int8Signed', 'First Byte', i8, toHex(i8, 1), toBinary(i8, 8));
+                html += createCard('int8Unsigned', 'First Byte', u8, toHex(u8, 1), toBinary(u8, 8));
+                
+                html += '</div></div>';
+            }
+
+            // 16-bit integers
+            if (currentBytes.length >= 2) {
+                html += '<div class="data-type-section">';
+                html += '<div class="section-title">📊 16-bit Integer Values</div>';
+                html += '<div class="conversion-grid">';
+                
+                const ab = (currentBytes[0] << 8) | currentBytes[1];
+                const ba = (currentBytes[1] << 8) | currentBytes[0];
+                const i16AB = ab > 32767 ? ab - 65536 : ab;
+                const i16BA = ba > 32767 ? ba - 65536 : ba;
+                
+                html += createCard('int16SignedAB', 'Big Endian', i16AB, toHex(i16AB, 2), toBinary(i16AB, 16));
+                html += createCard('int16UnsignedAB', 'Big Endian', ab, toHex(ab, 2), toBinary(ab, 16));
+                html += createCard('int16SignedBA', 'Little Endian', i16BA, toHex(i16BA, 2), toBinary(i16BA, 16));
+                html += createCard('int16UnsignedBA', 'Little Endian', ba, toHex(ba, 2), toBinary(ba, 16));
+                
+                html += '</div></div>';
+            }
+
+            // 32-bit integers
+            if (currentBytes.length >= 4) {
+                html += '<div class="data-type-section">';
+                html += '<div class="section-title">📊 32-bit Integer Values</div>';
+                html += '<div class="conversion-grid">';
+
+                const variants = {
+                    'ABCD': [0, 1, 2, 3],
+                    'DCBA': [3, 2, 1, 0],
+                    'BADC': [1, 0, 3, 2],
+                    'CDAB': [2, 3, 0, 1]
+                };
+
+                for (const [name, order] of Object.entries(variants)) {
+                    const bytes = order.map(i => currentBytes[i]);
+                    const u32 = bytesToUint32(bytes);
+                    const i32 = u32 > 0x7FFFFFFF ? u32 - 0x100000000 : u32;
+                    
+                    html += createCard(`int32Signed${name}`, name + ' byte order', i32, toHex(i32, 4), toBinary(i32, 32));
+                    html += createCard(`int32Unsigned${name}`, name + ' byte order', u32, toHex(u32, 4), toBinary(u32, 32));
+                }
+                
+                html += '</div></div>';
+
+                // 32-bit Float
+                html += '<div class="data-type-section">';
+                html += '<div class="section-title">📊 32-bit Float Values (IEEE 754)</div>';
+                html += '<div class="conversion-grid">';
+
+                for (const [name, order] of Object.entries(variants)) {
+                    const bytes = order.map(i => currentBytes[i]);
+                    const float = bytesToFloat32(bytes);
+                    const u32 = bytesToUint32(bytes);
+                    
+                    html += createCard(`ieeeFloat32${name}`, name + ' byte order', 
+                        float.toExponential(6), toHex(u32, 4), toBinary(u32, 32));
+                }
+                
+                html += '</div></div>';
+            }
+
+            // 64-bit integers
+            if (currentBytes.length >= 8) {
+                html += '<div class="data-type-section">';
+                html += '<div class="section-title">📊 64-bit Integer Values</div>';
+                html += '<div class="conversion-grid">';
+
+                const variants64 = {
+                    'ABCDEFGH': [0, 1, 2, 3, 4, 5, 6, 7],
+                    'HGFEDCBA': [7, 6, 5, 4, 3, 2, 1, 0],
+                    'BADCFEHG': [1, 0, 3, 2, 5, 4, 7, 6],
+                    'CDABGHEF': [2, 3, 0, 1, 6, 7, 4, 5],
+                    'DCBAHGFE': [3, 2, 1, 0, 7, 6, 5, 4],
+                    'GHEFCDAB': [6, 7, 4, 5, 2, 3, 0, 1],
+                    'FEHGBADC': [5, 4, 7, 6, 1, 0, 3, 2],
+                    'EFGHABCD': [4, 5, 6, 7, 0, 1, 2, 3]
+                };
+
+                for (const [name, order] of Object.entries(variants64)) {
+                    const bytes = order.map(i => currentBytes[i]);
+                    const u64 = bytesToUint64(bytes);
+                    const i64 = u64 > 0x7FFFFFFFFFFFFFFFn ? u64 - 0x10000000000000000n : u64;
+                    
+                    html += createCard(`int64Signed${name}`, name + ' byte order', 
+                        i64.toString(), toHex(i64, 8), toBinary(i64, 64));
+                    html += createCard(`int64Unsigned${name}`, name + ' byte order', 
+                        u64.toString(), toHex(u64, 8), toBinary(u64, 64));
+                }
+                
+                html += '</div></div>';
+
+                // 64-bit Float
+                html += '<div class="data-type-section">';
+                html += '<div class="section-title">📊 64-bit Float Values (IEEE 754)</div>';
+                html += '<div class="conversion-grid">';
+
+                for (const [name, order] of Object.entries(variants64)) {
+                    const bytes = order.map(i => currentBytes[i]);
+                    const float = bytesToFloat64(bytes);
+                    const u64 = bytesToUint64(bytes);
+                    
+                    html += createCard(`ieeeFloat64${name}`, name + ' byte order', 
+                        float.toExponential(10), toHex(u64, 8), toBinary(u64, 64));
+                }
+                
+                html += '</div></div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function bytesToUint32(bytes) {
+            // Use >>> 0 to convert to unsigned 32-bit integer
+            return ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0;
+        }
+
+        function bytesToUint64(bytes) {
+            return (BigInt(bytes[0]) << 56n) | (BigInt(bytes[1]) << 48n) |
+                   (BigInt(bytes[2]) << 40n) | (BigInt(bytes[3]) << 32n) |
+                   (BigInt(bytes[4]) << 24n) | (BigInt(bytes[5]) << 16n) |
+                   (BigInt(bytes[6]) << 8n) | BigInt(bytes[7]);
+        }
+
+        function bytesToFloat32(bytes) {
+            const buffer = new ArrayBuffer(4);
+            const view = new DataView(buffer);
+            bytes.forEach((b, i) => view.setUint8(i, b));
+            return view.getFloat32(0, false);
+        }
+
+        function bytesToFloat64(bytes) {
+            const buffer = new ArrayBuffer(8);
+            const view = new DataView(buffer);
+            bytes.forEach((b, i) => view.setUint8(i, b));
+            return view.getFloat64(0, false);
+        }
+
+        // Export to Excel functionality
+        function exportToExcel() {
+            if (currentBytes.length === 0) {
+                alert('Please enter hex values first!');
+                return;
+            }
+
+            const hexInput = document.getElementById('hexInput').value;
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            // Add header
+            csvContent += "Hex Converter Export\n";
+            csvContent += "Input Hex," + hexInput + "\n\n";
+
+            // Add bytes
+            csvContent += "Bytes\n";
+            csvContent += "Index,Hex,Decimal\n";
+            currentBytes.forEach((byte, idx) => {
+                csvContent += `${idx},${byte.toString(16).toUpperCase().padStart(2, '0')},${byte}\n`;
+            });
+            csvContent += "\n";
+
+            // 8-bit integers
+            if (currentBytes.length >= 1) {
+                csvContent += "8-bit Integers\n";
+                csvContent += "Type,Decimal,Hexadecimal,Binary\n";
+                const u8 = currentBytes[0];
+                const i8 = u8 > 127 ? u8 - 256 : u8;
+                csvContent += `int8Signed,${i8},${toHex(i8, 1)},${toBinary(i8, 8)}\n`;
+                csvContent += `int8Unsigned,${u8},${toHex(u8, 1)},${toBinary(u8, 8)}\n`;
+                csvContent += "\n";
+            }
+
+            // 16-bit integers
+            if (currentBytes.length >= 2) {
+                csvContent += "16-bit Integers\n";
+                csvContent += "Type,Byte Order,Decimal,Hexadecimal,Binary\n";
+                const ab = (currentBytes[0] << 8) | currentBytes[1];
+                const ba = (currentBytes[1] << 8) | currentBytes[0];
+                const i16AB = ab > 32767 ? ab - 65536 : ab;
+                const i16BA = ba > 32767 ? ba - 65536 : ba;
+                csvContent += `int16SignedAB,Big Endian,${i16AB},${toHex(i16AB, 2)},${toBinary(i16AB, 16)}\n`;
+                csvContent += `int16UnsignedAB,Big Endian,${ab},${toHex(ab, 2)},${toBinary(ab, 16)}\n`;
+                csvContent += `int16SignedBA,Little Endian,${i16BA},${toHex(i16BA, 2)},${toBinary(i16BA, 16)}\n`;
+                csvContent += `int16UnsignedBA,Little Endian,${ba},${toHex(ba, 2)},${toBinary(ba, 16)}\n`;
+                csvContent += "\n";
+            }
+
+            // 32-bit integers
+            if (currentBytes.length >= 4) {
+                csvContent += "32-bit Integers\n";
+                csvContent += "Type,Byte Order,Decimal,Hexadecimal,Binary\n";
+                const variants = {
+                    'ABCD': [0, 1, 2, 3],
+                    'DCBA': [3, 2, 1, 0],
+                    'BADC': [1, 0, 3, 2],
+                    'CDAB': [2, 3, 0, 1]
+                };
+                for (const [name, order] of Object.entries(variants)) {
+                    const bytes = order.map(i => currentBytes[i]);
+                    const u32 = bytesToUint32(bytes);
+                    const i32 = u32 > 0x7FFFFFFF ? u32 - 0x100000000 : u32;
+                    csvContent += `int32Signed${name},${name},${i32},${toHex(i32, 4)},${toBinary(i32, 32)}\n`;
+                    csvContent += `int32Unsigned${name},${name},${u32},${toHex(u32, 4)},${toBinary(u32, 32)}\n`;
+                }
+                csvContent += "\n";
+
+                // 32-bit Float
+                csvContent += "32-bit Float (IEEE 754)\n";
+                csvContent += "Type,Byte Order,Decimal,Hexadecimal,Binary\n";
+                for (const [name, order] of Object.entries(variants)) {
+                    const bytes = order.map(i => currentBytes[i]);
+                    const float = bytesToFloat32(bytes);
+                    const u32 = bytesToUint32(bytes);
+                    csvContent += `ieeeFloat32${name},${name},${float.toExponential(6)},${toHex(u32, 4)},${toBinary(u32, 32)}\n`;
+                }
+                csvContent += "\n";
+            }
+
+            // 64-bit integers
+            if (currentBytes.length >= 8) {
+                csvContent += "64-bit Integers\n";
+                csvContent += "Type,Byte Order,Decimal,Hexadecimal,Binary\n";
+                const variants64 = {
+                    'ABCDEFGH': [0, 1, 2, 3, 4, 5, 6, 7],
+                    'HGFEDCBA': [7, 6, 5, 4, 3, 2, 1, 0],
+                    'BADCFEHG': [1, 0, 3, 2, 5, 4, 7, 6],
+                    'CDABGHEF': [2, 3, 0, 1, 6, 7, 4, 5]
+                };
+                for (const [name, order] of Object.entries(variants64)) {
+                    const bytes = order.map(i => currentBytes[i]);
+                    const u64 = bytesToUint64(bytes);
+                    const i64 = u64 > 0x7FFFFFFFFFFFFFFFn ? u64 - 0x10000000000000000n : u64;
+                    csvContent += `int64Signed${name},${name},${i64.toString()},${toHex(i64, 8)},${toBinary(i64, 64)}\n`;
+                    csvContent += `int64Unsigned${name},${name},${u64.toString()},${toHex(u64, 8)},${toBinary(u64, 64)}\n`;
+                }
+                csvContent += "\n";
+
+                // 64-bit Float
+                csvContent += "64-bit Float (IEEE 754)\n";
+                csvContent += "Type,Byte Order,Decimal,Hexadecimal,Binary\n";
+                for (const [name, order] of Object.entries(variants64)) {
+                    const bytes = order.map(i => currentBytes[i]);
+                    const float = bytesToFloat64(bytes);
+                    const u64 = bytesToUint64(bytes);
+                    csvContent += `ieeeFloat64${name},${name},${float.toExponential(10)},${toHex(u64, 8)},${toBinary(u64, 64)}\n`;
+                }
+                csvContent += "\n";
+            }
+
+            // Bit Boolean values
+            if (currentBytes.length >= 2) {
+                csvContent += "Bit Boolean Values (Register 0)\n";
+                csvContent += "Bit,Value\n";
+                const reg0 = (currentBytes[0] << 8) | (currentBytes[1] || 0);
+                for (let bit = 0; bit < 16; bit++) {
+                    const val = (reg0 >> bit) & 1;
+                    csvContent += `Bit ${bit},${val ? 'TRUE' : 'FALSE'}\n`;
+                }
+            }
+
+            // Create download link
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `hex_converter_${hexInput}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Add export button event listener
+        document.getElementById('exportButton').addEventListener('click', exportToExcel);
+    </script>
+</body>
+</html>
